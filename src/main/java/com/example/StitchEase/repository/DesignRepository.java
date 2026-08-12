@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface DesignRepository extends JpaRepository<Design, String> {
+public interface DesignRepository extends JpaRepository<Design, Long> {
 
     @Query("SELECT d FROM Design d WHERE " +
             "(:age IS NULL OR d.ageDemographics = :age) AND " +
