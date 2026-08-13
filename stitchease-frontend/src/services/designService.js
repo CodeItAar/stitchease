@@ -7,6 +7,11 @@ export const getAllDesigns = async () => {
     return response.data;
 };
 
+export const getFilteredDesigns = async (filters) => {
+    const response = await axios.get(`${API_BASE_URL}/filter`, { params: filters });
+    return response.data;
+};
+
 export const createDesign = async (formData) => {
     const response = await axios.post(`${API_BASE_URL}/add`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -15,7 +20,7 @@ export const createDesign = async (formData) => {
 };
 
 export const updateDesign = async (id, designData) => {
-    const response = await axios.put(`${API_BASE_URL}/update/${id}`, designData);
+    const response = await axios.put(`${API_BASE_URL}/${id}`, designData);
     return response.data;
 };
 

@@ -12,10 +12,10 @@ import java.util.List;
 public interface DesignRepository extends JpaRepository<Design, Long> {
 
     @Query("SELECT d FROM Design d WHERE " +
-            "(:age IS NULL OR d.ageDemographics = :age) AND " +
-            "(:gender IS NULL OR d.gender = :gender) AND " +
-            "(:category IS NULL OR d.category = :category) AND " +
-            "(:outfit IS NULL OR d.outfitType = :outfit)")
+            "(:age IS NULL OR LOWER(d.ageDemographics) LIKE LOWER(CONCAT('%', :age, '%'))) AND " +
+            "(:gender IS NULL OR LOWER(d.gender) LIKE LOWER(CONCAT('%', :gender, '%'))) AND " +
+            "(:category IS NULL OR LOWER(d.category) LIKE LOWER(CONCAT('%', :category, '%'))) AND " +
+            "(:outfit IS NULL OR LOWER(d.outfitType) LIKE LOWER(CONCAT('%', :outfit, '%')))")
     List<Design> filterDesigns(
             @Param("age") String age,
             @Param("gender") String gender,
