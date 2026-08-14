@@ -4,6 +4,8 @@ import AddDesignModal from './AddDesignModal';
 
 export default function Dashboard() {
   const [designs, setDesigns] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeSearchTerm, setActiveSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [designToEdit, setDesignToEdit] = useState(null);
 
@@ -39,23 +41,62 @@ export default function Dashboard() {
           <h2 style={{ color: '#5a0f28', margin: 0, fontStyle: 'italic' }}>StitchEase</h2>
           <div style={{ display: 'flex', gap: '2rem', color: '#475569', fontWeight: '500' }}>
             <span>Dashboard</span>
+            <span style={{ color: '#5a0f28', borderBottom: '2px solid #5a0f28', paddingBottom: '0.2rem' }}>Designs</span>
             <span>Orders</span>
-            <span>Clients</span>
-            <span style={{ color: '#5a0f28', borderBottom: '2px solid #5a0f28', paddingBottom: '0.2rem' }}>My Designs</span>
+            <span>Customers</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ width: '35px', height: '35px', backgroundColor: '#e2e8f0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>👤</div>
           </div>
         </nav>
 
         {/* Main Content Area */}
         <main style={{ padding: '2rem 3rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-              <h1 style={{ margin: 0, color: '#0f172a', fontSize: '2rem', lineHeight: '1.2' }}>
-                My Designs
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
+              <h1 style={{ margin: 0, color: '#5a0f28', fontSize: '2.2rem', fontFamily: '"Playfair Display", serif' }}>
+                Manage Designs
               </h1>
-              <p style={{ margin: 0, color: '#64748b', fontSize: '1rem', lineHeight: '1.5' }}>
-                Browse and manage your uploaded designs.
+              <p style={{ margin: 0, color: '#64748b', fontSize: '0.9rem', lineHeight: '1.5', maxWidth: '400px' }}>
+                Curation and oversight of the StitchEase seasonal collections and bespoke patterns.
               </p>
             </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              {activeSearchTerm && (
+                <button 
+                  onClick={() => {
+                    setActiveSearchTerm('');
+                    setSearchTerm('');
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '1.2rem',
+                    cursor: 'pointer',
+                    color: '#5a0f28',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '0'
+                  }}
+                  title="Clear Search"
+                >
+                  ⬅️
+                </button>
+              )}
+              <input 
+                type="text" 
+                placeholder="🔍 Search designs..." 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setActiveSearchTerm(searchTerm);
+                  }
+                }}
+                style={{ padding: '0.6rem 1rem', borderRadius: '6px', border: '1px solid #e2e8f0', width: '250px' }}
+              />
 
             <button
                 onClick={() => {
@@ -75,11 +116,15 @@ export default function Dashboard() {
             >
               + Add New Design
             </button>
+            </div>
           </div>
 
           {/* Card Grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.5rem' }}>
-            {designs.map((item) => (
+            {designs.filter(design => 
+              design.title.toLowerCase().includes(activeSearchTerm.toLowerCase()) || 
+              design.category.toLowerCase().includes(activeSearchTerm.toLowerCase())
+            ).map((item) => (
                 <div key={item.id} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                   <div style={{ padding: '0.8rem', textAlign: 'center', fontWeight: '600', color: '#1e293b' }}>
                     {item.title}
@@ -87,7 +132,7 @@ export default function Dashboard() {
                   <img
                       src={item.sampleImage}
                       alt={item.title}
-                      style={{ width: '100%', height: '220px', objectFit: 'cover' }}
+                      style={{ width: '100%', height: '220px', objectFit: 'contain', backgroundColor: '#fcfaf6' }}
                   />
                   <div style={{ padding: '0.8rem', color: '#64748b', fontSize: '0.9rem' }}>
                     <p style={{ margin: 0 }}>{item.category}</p>

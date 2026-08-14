@@ -16,7 +16,7 @@ export default function LoginPage() {
       const user = await login(email, password);
       loginUser(user);
       if (user.role === 'TAILOR') {
-        navigate('/dashboard');
+        navigate('/admin/designs');
       } else {
         navigate('/explore');
       }
@@ -27,7 +27,7 @@ export default function LoginPage() {
         const newUser = await register({ name: email.split('@')[0], email, password, role });
         loginUser(newUser);
         if (newUser.role === 'TAILOR') {
-          navigate('/dashboard');
+          navigate('/admin/designs');
         } else {
           navigate('/explore');
         }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from './components/LandingPage';
-import Dashboard from './components/Dashboard';
+import ManageDesigns from './components/ManageDesigns';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 import ExploreDesigns from './components/ExploreDesigns';
@@ -28,10 +28,10 @@ export default function App() {
             } 
           />
           <Route 
-            path="/dashboard" 
+            path="/admin/designs" 
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <ManageDesigns />
               </ProtectedRoute>
             } 
           />
