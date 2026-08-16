@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getAllDesigns, deleteDesign } from '../services/designService';
 import AddDesignModal from './AddDesignModal';
+import ManageColorsModal from './ManageColorsModal';
 import Sidebar from './Sidebar';
 
 export default function Dashboard() {
@@ -9,6 +10,9 @@ export default function Dashboard() {
   const [activeSearchTerm, setActiveSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [designToEdit, setDesignToEdit] = useState(null);
+  
+  const [isColorsModalOpen, setIsColorsModalOpen] = useState(false);
+  const [designForColors, setDesignForColors] = useState(null);
 
   const loadDesigns = async () => {
     try {
@@ -33,6 +37,11 @@ export default function Dashboard() {
   const handleEdit = (design) => {
     setDesignToEdit(design);
     setIsModalOpen(true);
+  };
+  
+  const handleManageColors = (design) => {
+    setDesignForColors(design);
+    setIsColorsModalOpen(true);
   };
 
   return (
@@ -126,8 +135,17 @@ export default function Dashboard() {
                   <div style={{ padding: '0.8rem', color: '#64748b', fontSize: '0.9rem' }}>
                     <p style={{ margin: 0 }}>{item.category}</p>
                     <p style={{ margin: '0.25rem 0 0', fontWeight: 'bold', color: '#0f172a' }}>₹{item.basePrice}</p>
+                    {item.colorVariants && item.colorVariants.length > 0 && (
+                        <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: '#5a0f28' }}>{item.colorVariants.length} variants</p>
+                    )}
                   </div>
                   <div style={{ display: 'flex', borderTop: '1px solid #e2e8f0', marginTop: 'auto' }}>
+                    <button 
+                      onClick={() => handleManageColors(item)}
+                      style={{ flex: 1, padding: '0.5rem', border: 'none', borderRight: '1px solid #e2e8f0', background: '#f8fafc', cursor: 'pointer', color: '#0f172a' }}
+                    >
+                      🎨 Colors
+                    </button>
                     <button 
                       onClick={() => handleEdit(item)}
                       style={{ flex: 1, padding: '0.5rem', border: 'none', borderRight: '1px solid #e2e8f0', background: 'none', cursor: 'pointer' }}
@@ -138,7 +156,7 @@ export default function Dashboard() {
                         onClick={() => handleDelete(item.id)}
                         style={{ flex: 1, padding: '0.5rem', border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer' }}
                     >
-                      🗑️ Delete
+                      🗑️
                     </button>
                   </div>
                 </div>
@@ -154,6 +172,30 @@ export default function Dashboard() {
             }}
             onSuccess={loadDesigns}
             designToEdit={designToEdit}
+        />
+        
+        <ManageColorsModal
+            isOpen={isColorsModalOpen}
+            onClose={() => {
+              setIsColorsModalOpen(false);
+              setDesignForColors(null);
+            }}
+            design={designForColors}
+            onSuccess={async () => {
+                // reload designs and update the currently selected design for colors to show changes in modal
+                try {
+                    const data = await getAllDesigns();
+                    setDesigns(data);
+                    if (designForColors) {
+                        const updatedDesign = data.find(d => d.id === designForColors.id);
+                        if (updatedDesign) {
+                            setDesignForColors(updatedDesign);
+                        }
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            }}
         />
       </div>
   );

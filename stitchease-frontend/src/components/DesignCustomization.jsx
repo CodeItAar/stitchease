@@ -32,8 +32,9 @@ export default function DesignCustomization() {
         const fabrics = optionsRes.data.filter(o => o.category === 'FABRIC');
         if (fabrics.length > 0) setSelectedFabric(fabrics[0]);
 
-        const colors = optionsRes.data.filter(o => o.category === 'COLOR');
-        if (colors.length > 0) setSelectedColor(colors[0]);
+        if (designRes.data.colorVariants && designRes.data.colorVariants.length > 0) {
+          setSelectedColor(designRes.data.colorVariants[0]);
+        }
 
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -45,7 +46,7 @@ export default function DesignCustomization() {
   }, [id]);
 
   const fabrics = options.filter(o => o.category === 'FABRIC');
-  const colors = options.filter(o => o.category === 'COLOR');
+  const colors = design?.colorVariants || [];
   const details = options.filter(o => o.category === 'DETAIL');
 
   const handleDetailToggle = (detail) => {
@@ -75,7 +76,6 @@ export default function DesignCustomization() {
     if (!design) return 0;
     let total = design.basePrice || 0;
     if (selectedFabric && selectedFabric.priceModifier) total += selectedFabric.priceModifier;
-    if (selectedColor && selectedColor.priceModifier) total += selectedColor.priceModifier;
     selectedDetails.forEach(d => {
       if (d.priceModifier) total += d.priceModifier;
     });
@@ -188,25 +188,29 @@ export default function DesignCustomization() {
             <div>
               <h3 style={{ margin: '0 0 1rem 0', color: '#555', fontWeight: '500' }}>Color Palette</h3>
               <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem' }}>
-                {colors.map(color => (
-                  <div
-                    key={color.id}
-                    onClick={() => handleColorSelect(color)}
-                    style={{
-                      width: '35px',
-                      height: '35px',
-                      borderRadius: '50%',
-                      backgroundColor: color.colorHex || '#ccc',
-                      cursor: 'pointer',
-                      border: selectedColor?.id === color.id ? '2px solid #fff' : '2px solid transparent',
-                      boxShadow: selectedColor?.id === color.id ? '0 0 0 2px #5a0f28' : '0 1px 3px rgba(0,0,0,0.1)'
-                    }}
-                    title={color.name}
-                  />
-                ))}
+                {colors.length === 0 ? (
+                    <span style={{ color: '#888', fontSize: '0.9rem' }}>No color options available</span>
+                ) : (
+                    colors.map(color => (
+                      <div
+                        key={color.id}
+                        onClick={() => handleColorSelect(color)}
+                        style={{
+                          width: '35px',
+                          height: '35px',
+                          borderRadius: '50%',
+                          backgroundColor: color.colorHex || '#ccc',
+                          cursor: 'pointer',
+                          border: selectedColor?.id === color.id ? '2px solid #fff' : '2px solid transparent',
+                          boxShadow: selectedColor?.id === color.id ? '0 0 0 2px #5a0f28' : '0 1px 3px rgba(0,0,0,0.1)'
+                        }}
+                        title={color.colorName}
+                      />
+                    ))
+                )}
               </div>
               <div style={{ fontSize: '0.8rem', color: '#666' }}>
-                Selected: <span style={{ color: '#333', fontWeight: 'bold' }}>{selectedColor?.name || 'None'}</span>
+                Selected: <span style={{ color: '#333', fontWeight: 'bold' }}>{selectedColor?.colorName || 'None'}</span>
               </div>
             </div>
 

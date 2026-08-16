@@ -28,3 +28,15 @@ export const deleteDesign = async (id) => {
     const response = await axios.delete(`${API_BASE_URL}/${id}`);
     return response.data;
 };
+
+export const addColorVariant = async (designId, formData) => {
+    const response = await axios.post(`${API_BASE_URL}/${designId}/colors`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+};
+
+export const deleteColorVariant = async (designId, colorId) => {
+    const response = await axios.delete(`${API_BASE_URL}/${designId}/colors/${colorId}`);
+    return response.data;
+};
