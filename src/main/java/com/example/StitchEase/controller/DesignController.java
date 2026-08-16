@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.List;
 import java.util.UUID;
+import com.example.StitchEase.model.DesignColorVariant;
+import com.example.StitchEase.repository.DesignColorVariantRepository;
 
 @RestController
 @RequestMapping("/api/designs")
@@ -27,10 +29,12 @@ public class DesignController {
 
     // Final variable for immutable dependency injection
     private final DesignRepository designRepository;
+    private final DesignColorVariantRepository designColorVariantRepository;
 
     // Constructor Injection (Fixes 'Field injection is not recommended' warning)
-    public DesignController(DesignRepository designRepository) {
+    public DesignController(DesignRepository designRepository, DesignColorVariantRepository designColorVariantRepository) {
         this.designRepository = designRepository;
+        this.designColorVariantRepository = designColorVariantRepository;
     }
 
     // Public: Fetch all catalog designs
@@ -132,6 +136,53 @@ public class DesignController {
 
         designRepository.delete(design);
         return ResponseEntity.ok("Design deleted successfully");
+    }
+
+    // Admin/Tailor: Add color variant
+    @Operation(summary = "Add a color variant to a design")
+    @PostMapping(value = "/{id}/colors", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> addColorVariant(
+            @PathVariable Long id,
+            @RequestParam("colorName") String colorName,
+            @RequestParam("colorHex") String colorHex,
+            @RequestParam("image") MultipartFile imageFile) {
+
+        try {
+            Design design = designRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Design not found with ID: " + id));
+
+            String imageUrl = saveImageFile(imageFile);
+
+            DesignColorVariant variant = new DesignColorVariant();
+            variant.setColorName(colorName);
+            variant.setColorHex(colorHex);
+            variant.setImageUrl(imageUrl);
+            variant.setDesign(design);
+
+            DesignColorVariant savedVariant = designColorVariantRepository.save(variant);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedVariant);
+
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to upload image file: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    // Admin/Tailor: Delete color variant
+    @Operation(summary = "Delete a color variant from a design")
+    @DeleteMapping("/{designId}/colors/{colorId}")
+    public ResponseEntity<String> deleteColorVariant(@PathVariable Long designId, @PathVariable Long colorId) {
+        DesignColorVariant variant = designColorVariantRepository.findById(colorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Color variant not found with ID: " + colorId));
+
+        if (!variant.getDesign().getId().equals(designId)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Color variant does not belong to this design");
+        }
+
+        designColorVariantRepository.delete(variant);
+        return ResponseEntity.ok("Color variant deleted successfully");
     }
 
     // Helper method using modern Java NIO (Fixes 'Result of File.mkdirs() is ignored' warning)

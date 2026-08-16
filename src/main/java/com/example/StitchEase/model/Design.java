@@ -5,6 +5,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
 import lombok.Data;
 
 @Entity
@@ -23,4 +25,7 @@ public class Design {
     private String outfitType;
     private Double basePrice; // Changed from String to Double for numeric consistency
     private String sampleImage;
+
+    @OneToMany(mappedBy = "design", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<DesignColorVariant> colorVariants;
 }
