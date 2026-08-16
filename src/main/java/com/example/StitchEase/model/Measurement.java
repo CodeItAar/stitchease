@@ -19,6 +19,9 @@ public class Measurement {
     private Double hips;
     private Double shoulder;
     private Double length;
+    private Double sleeveLength;
+    private Double neck;
+    private Double inseam;
 
     @Column(columnDefinition = "TEXT")
     private String additionalNotes;
@@ -46,6 +49,15 @@ public class Measurement {
 
     public Double getLength() { return length; }
     public void setLength(Double length) { this.length = length; }
+
+    public Double getSleeveLength() { return sleeveLength; }
+    public void setSleeveLength(Double sleeveLength) { this.sleeveLength = sleeveLength; }
+
+    public Double getNeck() { return neck; }
+    public void setNeck(Double neck) { this.neck = neck; }
+
+    public Double getInseam() { return inseam; }
+    public void setInseam(Double inseam) { this.inseam = inseam; }
 
     public String getAdditionalNotes() { return additionalNotes; }
     public void setAdditionalNotes(String additionalNotes) { this.additionalNotes = additionalNotes; }

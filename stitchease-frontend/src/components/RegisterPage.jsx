@@ -54,7 +54,7 @@ export default function RegisterPage() {
       loginUser(newUser);
 
       if (newUser.role === 'TAILOR') {
-        navigate('/admin/designs');
+        navigate('/admin');
       } else {
         navigate('/explore');
       }
@@ -92,7 +92,7 @@ export default function RegisterPage() {
           {step === 1 ? 'Join the StitchEase\nHeritage' : 'Artisan Details'}
         </h2>
         <p style={{ color: '#555', fontSize: '1.1rem', marginBottom: '3rem' }}>
-          {step === 1 ? 'Experience the art of bespoke ethnic tailoring.' : 'Step 2 of 2: Professional Details'}
+          {step === 1 ? 'Experience the art of ethnic tailoring.' : 'Step 2 of 2: Professional Details'}
         </p>
 
         {/* Stepper */}

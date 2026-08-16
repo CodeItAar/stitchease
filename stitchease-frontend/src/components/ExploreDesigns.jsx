@@ -117,7 +117,33 @@ export default function ExploreDesigns() {
         </div>
       </header>
 
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        {(search || category || gender || age || outfit) && (
+          <button 
+            onClick={() => {
+              setSearch('');
+              setCategory('');
+              setGender('');
+              setAge('');
+              setOutfit('');
+              fetchDesigns();
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '1.5rem',
+              cursor: 'pointer',
+              color: '#5a0f28',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '0'
+            }}
+            title="Clear Search & Filters"
+          >
+            ⬅️
+          </button>
+        )}
         <input 
           type="text" 
           value={search}
@@ -160,7 +186,7 @@ export default function ExploreDesigns() {
       <div style={{ display: 'flex', gap: '2rem' }}>
         <div style={{ flex: '3', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '2rem' }}>
           {designs.map(design => (
-            <div key={design.id} style={{ backgroundColor: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', cursor: 'pointer', transition: 'transform 0.2s', position: 'relative' }} onClick={() => navigate('/login')}>
+            <div key={design.id} style={{ backgroundColor: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', cursor: 'pointer', transition: 'transform 0.2s', position: 'relative' }} onClick={() => navigate('/design-customization/' + design.id)}>
               <div 
                 onClick={(e) => toggleWishlist(e, design.id)}
                 style={{ position: 'absolute', top: '10px', right: '10px', width: '35px', height: '35px', borderRadius: '50%', backgroundColor: 'rgba(255,255,255,0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', zIndex: 10, fontSize: '1.2rem', color: wishlist.some(w => w.id === design.id) ? '#e91e63' : '#777' }}

@@ -1,8 +1,21 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import heroImage from '../assets/hero.png';
 
 export default function LandingPage() {
+  const { user } = useContext(AuthContext);
+
+  const getBrowseLink = () => {
+    if (!user) return '/login';
+    return user.role === 'TAILOR' ? '/admin/designs' : '/explore';
+  };
+
+  const getTrackLink = () => {
+    if (!user) return '/login';
+    return '/profile';
+  };
+
   return (
     <div className="landing-container" style={{ fontFamily: 'Inter, sans-serif', backgroundColor: '#fdfbf7', minHeight: '100vh', color: '#333' }}>
 
@@ -13,9 +26,9 @@ export default function LandingPage() {
         </div>
         <div className="nav-links" style={{ display: 'flex', gap: '3rem', fontSize: '1rem', color: '#4a4a4a' }}>
           <Link to="/explore" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>Designs</Link>
-          <Link to="/dashboard" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>How it Works</Link>
-          <Link to="/dashboard" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>Track Order</Link>
-          <Link to="/dashboard" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>About Us</Link>
+          <Link to="/explore" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>How it Works</Link>
+          <Link to="/profile" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>Track Order</Link>
+          <Link to="/" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>About Us</Link>
         </div>
         <div className="nav-actions">
           <Link to="/register" style={{ textDecoration: 'none' }}>
@@ -39,12 +52,12 @@ export default function LandingPage() {
             Experience the luxury of heritage-crafted bridal, party, and intricate embroidery wear, tailored specifically for your unique measurements. Our atelier brings bespoke artistry to your fingertips.
           </p>
           <div style={{ display: 'flex', gap: '1rem' }}>
-            <Link to="/dashboard" style={{ textDecoration: 'none' }}>
+            <Link to={getBrowseLink()} style={{ textDecoration: 'none' }}>
               <button style={{ backgroundColor: '#5a0f28', color: '#fff', border: 'none', padding: '1rem 2.5rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem' }}>
                 Browse My Design
               </button>
             </Link>
-            <Link to="/dashboard" style={{ textDecoration: 'none' }}>
+            <Link to={getTrackLink()} style={{ textDecoration: 'none' }}>
               <button style={{ backgroundColor: 'transparent', color: '#5a0f28', border: '1px solid #5a0f28', padding: '1rem 2.5rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem' }}>
                 Track Orders
               </button>

@@ -40,6 +40,15 @@ public class DesignController {
         return ResponseEntity.ok(designRepository.findAll());
     }
 
+    // Public: Fetch a specific design by ID
+    @Operation(summary = "Get design by ID")
+    @GetMapping("/{id}")
+    public ResponseEntity<Design> getDesignById(@PathVariable Long id) {
+        Design design = designRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Design not found with ID: " + id));
+        return ResponseEntity.ok(design);
+    }
+
     // Public: Filter designs by options
     @Operation(summary = "Filter designs by demography, gender, category, or outfit type")
     @GetMapping("/filter")

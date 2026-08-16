@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getAllDesigns, deleteDesign } from '../services/designService';
 import AddDesignModal from './AddDesignModal';
+import Sidebar from './Sidebar';
 
 export default function Dashboard() {
   const [designs, setDesigns] = useState([]);
@@ -35,23 +36,11 @@ export default function Dashboard() {
   };
 
   return (
-      <div style={{ fontFamily: 'sans-serif', backgroundColor: '#f8fafc', minHeight: '100vh' }}>
-        {/* Navigation Header */}
-        <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 3rem', background: '#fff', borderBottom: '1px solid #e2e8f0', alignItems: 'center' }}>
-          <h2 style={{ color: '#5a0f28', margin: 0, fontStyle: 'italic' }}>StitchEase</h2>
-          <div style={{ display: 'flex', gap: '2rem', color: '#475569', fontWeight: '500' }}>
-            <span>Dashboard</span>
-            <span style={{ color: '#5a0f28', borderBottom: '2px solid #5a0f28', paddingBottom: '0.2rem' }}>Designs</span>
-            <span>Orders</span>
-            <span>Customers</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ width: '35px', height: '35px', backgroundColor: '#e2e8f0', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>👤</div>
-          </div>
-        </nav>
+      <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#fafafa', fontFamily: 'Inter, sans-serif' }}>
+        <Sidebar />
 
         {/* Main Content Area */}
-        <main style={{ padding: '2rem 3rem' }}>
+        <main style={{ flex: 1, padding: '2rem 3rem', overflowY: 'auto' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1 }}>
               <h1 style={{ margin: 0, color: '#5a0f28', fontSize: '2.2rem', fontFamily: '"Playfair Display", serif' }}>

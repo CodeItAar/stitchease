@@ -13,7 +13,11 @@ public interface DesignRepository extends JpaRepository<Design, Long> {
 
     @Query("SELECT d FROM Design d WHERE " +
             "(:age IS NULL OR LOWER(d.ageDemographics) LIKE LOWER(CONCAT('%', :age, '%'))) AND " +
-            "(:gender IS NULL OR LOWER(d.gender) LIKE LOWER(CONCAT('%', :gender, '%'))) AND " +
+            "(:gender IS NULL OR " +
+            "    (LOWER(:gender) = 'women' AND (LOWER(d.gender) LIKE '%women%' OR LOWER(d.gender) LIKE '%female%')) OR " +
+            "    (LOWER(:gender) = 'men' AND (LOWER(d.gender) LIKE '%men%' OR LOWER(d.gender) LIKE '%male%')) OR " +
+            "    (LOWER(:gender) NOT IN ('women', 'men') AND LOWER(d.gender) LIKE LOWER(CONCAT('%', :gender, '%'))) " +
+            ") AND " +
             "(:category IS NULL OR LOWER(d.category) LIKE LOWER(CONCAT('%', :category, '%'))) AND " +
             "(:outfit IS NULL OR LOWER(d.outfitType) LIKE LOWER(CONCAT('%', :outfit, '%')))")
     List<Design> filterDesigns(
