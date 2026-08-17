@@ -20,4 +20,8 @@ public class OrderRequestDTO {
 
     @NotNull(message = "Measurement ID is required")
     private Long measurementId;
+
+    private String deliveryMethod;
+    
+    private Long shippingAddressId;
 }

@@ -45,4 +45,11 @@ public class MeasurementController {
     public ResponseEntity<List<Measurement>> getMeasurementsByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(measurementRepository.findByUserId(userId));
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Measurement> getMeasurementById(@PathVariable Long id) {
+        return measurementRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

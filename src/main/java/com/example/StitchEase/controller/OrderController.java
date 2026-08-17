@@ -54,6 +54,13 @@ public class OrderController {
         order.setStatus(requestDTO.getStatus());
         order.setUser(persistentUser);
         order.setMeasurement(persistentMeasurement);
+        
+        if (requestDTO.getDeliveryMethod() != null) {
+            order.setDeliveryMethod(requestDTO.getDeliveryMethod());
+        }
+        if (requestDTO.getShippingAddressId() != null) {
+            order.setShippingAddressId(requestDTO.getShippingAddressId());
+        }
 
         Order savedOrder = orderRepository.save(order);
 

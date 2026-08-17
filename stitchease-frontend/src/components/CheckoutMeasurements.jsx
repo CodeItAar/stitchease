@@ -61,14 +61,14 @@ export default function CheckoutMeasurements() {
       console.log('Measurement saved:', response.data);
       
       // In a real flow, you would pass the measurement ID forward to the next step
-      // navigate('/checkout-address', { state: { ...state, measurementId: response.data.id } });
-      alert('Measurements saved successfully! Navigating to Address step...');
+      navigate(`/checkout-delivery/${id}`, { state: { ...state, measurementId: response.data.id } });
+      // alert('Measurements saved successfully! Navigating to Address step...');
       
     } catch (error) {
       if (error.response && error.response.status === 409) {
           alert('These exact measurements already exist in your saved profile.');
           // Navigate forward using existing profile
-          // navigate('/checkout-address', { state: { ...state, measurementId: error.response.data.id } });
+          navigate(`/checkout-delivery/${id}`, { state: { ...state, measurementId: error.response.data.id } });
       } else {
           console.error('Error saving measurements:', error);
           alert('Failed to save measurements. Please try again.');

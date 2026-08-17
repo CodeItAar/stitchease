@@ -32,6 +32,9 @@ public class Order {
 
     private String status = "PLACED";
 
+    private String deliveryMethod; // "HOME_DELIVERY" or "STORE_PICKUP"
+    private Long shippingAddressId;
+
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public Order() {}
@@ -60,4 +63,10 @@ public class Order {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public String getDeliveryMethod() { return deliveryMethod; }
+    public void setDeliveryMethod(String deliveryMethod) { this.deliveryMethod = deliveryMethod; }
+
+    public Long getShippingAddressId() { return shippingAddressId; }
+    public void setShippingAddressId(Long shippingAddressId) { this.shippingAddressId = shippingAddressId; }
 }

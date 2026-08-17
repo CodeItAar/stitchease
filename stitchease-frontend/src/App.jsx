@@ -12,6 +12,8 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import DesignCustomization from './components/DesignCustomization';
 import CheckoutMeasurements from './components/CheckoutMeasurements';
+import CheckoutDelivery from './components/CheckoutDelivery';
+import CheckoutReview from './components/CheckoutReview';
 
 export default function App() {
   return (
@@ -76,6 +78,22 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <CheckoutMeasurements />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/checkout-delivery/:id" 
+            element={
+              <ProtectedRoute>
+                <CheckoutDelivery />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/checkout-review/:id" 
+            element={
+              <ProtectedRoute>
+                <CheckoutReview />
               </ProtectedRoute>
             } 
           />
