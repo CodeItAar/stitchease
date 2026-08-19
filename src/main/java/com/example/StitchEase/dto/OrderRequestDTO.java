@@ -24,4 +24,6 @@ public class OrderRequestDTO {
     private String deliveryMethod;
     
     private Long shippingAddressId;
+
+    private Long designId;
 }

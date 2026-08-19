@@ -23,6 +23,11 @@ public class OrderMapper {
             dto.setMeasurementId(order.getMeasurement().getId());
         }
 
+        if (order.getDesign() != null) {
+            dto.setDesignId(order.getDesign().getId());
+            dto.setDesignTitle(order.getDesign().getTitle());
+        }
+
         return dto;
     }
 }

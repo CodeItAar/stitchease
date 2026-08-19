@@ -12,4 +12,6 @@ public class OrderResponseDTO {
     private Long userId;
     private String userName;
     private Long measurementId;
+    private Long designId;
+    private String designTitle;
 }

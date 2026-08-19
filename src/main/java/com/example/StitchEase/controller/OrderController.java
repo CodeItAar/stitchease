@@ -61,6 +61,11 @@ public class OrderController {
         if (requestDTO.getShippingAddressId() != null) {
             order.setShippingAddressId(requestDTO.getShippingAddressId());
         }
+        if (requestDTO.getDesignId() != null) {
+            com.example.StitchEase.model.Design design = new com.example.StitchEase.model.Design();
+            design.setId(requestDTO.getDesignId());
+            order.setDesign(design);
+        }
 
         Order savedOrder = orderRepository.save(order);
 
