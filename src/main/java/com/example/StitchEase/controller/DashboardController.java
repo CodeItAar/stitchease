@@ -20,49 +20,67 @@ public class DashboardController {
     private OrderRepository orderRepository;
 
     @GetMapping("/dashboard")
-    public DashboardDTO getDashboardData() {
-        List<Order> allOrders = orderRepository.findAll();
+    public DashboardDTO getDashboardData(@org.springframework.web.bind.annotation.RequestParam(required = false) Long tailorId) {
+        List<Order> allOrders;
+        if (tailorId != null) {
+            allOrders = orderRepository.findByTailorId(tailorId);
+        } else {
+            allOrders = orderRepository.findAll();
+        }
         
         DashboardDTO dto = new DashboardDTO();
         DashboardDTO.Metrics metrics = new DashboardDTO.Metrics();
         
         if (allOrders.isEmpty()) {
-            // Return Mock Data if no orders exist, matching the beautiful design
-            metrics.setTotalOrders(1240);
-            metrics.setRevenue(4200000); // 4.2M
-            metrics.setActiveOrders(84);
-            metrics.setCompletionRate(98);
-            dto.setMetrics(metrics);
-            
-            dto.setOrdersOverTime(Arrays.asList(
-                    new DashboardDTO.ChartData("JAN", 400),
-                    new DashboardDTO.ChartData("FEB", 600),
-                    new DashboardDTO.ChartData("MAR", 500),
-                    new DashboardDTO.ChartData("APR", 800),
-                    new DashboardDTO.ChartData("MAY", 700),
-                    new DashboardDTO.ChartData("JUN", 1100),
-                    new DashboardDTO.ChartData("JUL", 900),
-                    new DashboardDTO.ChartData("AUG", 1300),
-                    new DashboardDTO.ChartData("SEP", 1100),
-                    new DashboardDTO.ChartData("OCT", 900),
-                    new DashboardDTO.ChartData("NOV", 700),
-                    new DashboardDTO.ChartData("DEC", 600)
-            ));
-            
-            dto.setOrdersByCategory(Arrays.asList(
-                    new DashboardDTO.CategoryData("Bridal", 45, "#5a0f28"),
-                    new DashboardDTO.CategoryData("Party", 25, "#8b7355"),
-                    new DashboardDTO.CategoryData("Casual", 20, "#2c5f2d"),
-                    new DashboardDTO.CategoryData("Embroidery", 10, "#e8d8d4")
-            ));
-            
-            dto.setRecentOrders(Arrays.asList(
-                    new DashboardDTO.RecentOrder("#SE-9510", "Alistair Sterling", "AS", "Velvet Blouse", "FABRIC SOURCING", 5800.0, "Nov 12, 2024"),
-                    new DashboardDTO.RecentOrder("#SE-9509", "Elena Moretti", "EM", "Silk Lehenga", "STITCHING", 24500.0, "Nov 11, 2024"),
-                    new DashboardDTO.RecentOrder("#SE-9508", "Julian Wright", "JW", "Linen Suit", "QUALITY CHECK", 12200.0, "Nov 10, 2024")
-            ));
-            
-            return dto;
+            if (tailorId != null) {
+                // Real empty state for a new tailor
+                metrics.setTotalOrders(0);
+                metrics.setRevenue(0);
+                metrics.setActiveOrders(0);
+                metrics.setCompletionRate(0);
+                dto.setMetrics(metrics);
+                dto.setOrdersOverTime(new ArrayList<>());
+                dto.setOrdersByCategory(new ArrayList<>());
+                dto.setRecentOrders(new ArrayList<>());
+                return dto;
+            } else {
+                // Return Mock Data if no orders exist and no tailor is specified
+                metrics.setTotalOrders(1240);
+                metrics.setRevenue(4200000); // 4.2M
+                metrics.setActiveOrders(84);
+                metrics.setCompletionRate(98);
+                dto.setMetrics(metrics);
+                
+                dto.setOrdersOverTime(Arrays.asList(
+                        new DashboardDTO.ChartData("W1", 400),
+                        new DashboardDTO.ChartData("W2", 600),
+                        new DashboardDTO.ChartData("W3", 500),
+                        new DashboardDTO.ChartData("W4", 800),
+                        new DashboardDTO.ChartData("W5", 700),
+                        new DashboardDTO.ChartData("W6", 1100),
+                        new DashboardDTO.ChartData("W7", 900),
+                        new DashboardDTO.ChartData("W8", 1300),
+                        new DashboardDTO.ChartData("W9", 1100),
+                        new DashboardDTO.ChartData("W10", 900),
+                        new DashboardDTO.ChartData("W11", 700),
+                        new DashboardDTO.ChartData("W12", 600)
+                ));
+                
+                dto.setOrdersByCategory(Arrays.asList(
+                        new DashboardDTO.CategoryData("Bridal", 45, "#5a0f28"),
+                        new DashboardDTO.CategoryData("Party", 25, "#8b7355"),
+                        new DashboardDTO.CategoryData("Casual", 20, "#2c5f2d"),
+                        new DashboardDTO.CategoryData("Embroidery", 10, "#e8d8d4")
+                ));
+                
+                dto.setRecentOrders(Arrays.asList(
+                        new DashboardDTO.RecentOrder("#SE-9510", "Alistair Sterling", "AS", "Velvet Blouse", "FABRIC SOURCING", 5800.0, "Nov 12, 2024"),
+                        new DashboardDTO.RecentOrder("#SE-9509", "Elena Moretti", "EM", "Silk Lehenga", "STITCHING", 24500.0, "Nov 11, 2024"),
+                        new DashboardDTO.RecentOrder("#SE-9508", "Julian Wright", "JW", "Linen Suit", "QUALITY CHECK", 12200.0, "Nov 10, 2024")
+                ));
+                
+                return dto;
+            }
         }
 
         // Calculate Real Data
@@ -77,15 +95,15 @@ public class DashboardController {
         }
         dto.setMetrics(metrics);
         
-        // Very basic orders over time calculation (just grouping by month name)
-        Map<String, Integer> monthCounts = new LinkedHashMap<>();
-        DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("MMM", Locale.ENGLISH);
+        // Orders over time calculation grouped by week
+        Map<String, Integer> weekCounts = new LinkedHashMap<>();
+        DateTimeFormatter weekFormatter = DateTimeFormatter.ofPattern("'W'w", Locale.ENGLISH);
         for (Order o : allOrders) {
-            String month = o.getCreatedAt().format(monthFormatter).toUpperCase();
-            monthCounts.put(month, monthCounts.getOrDefault(month, 0) + 1);
+            String week = o.getCreatedAt().format(weekFormatter);
+            weekCounts.put(week, weekCounts.getOrDefault(week, 0) + 1);
         }
         List<DashboardDTO.ChartData> chartData = new ArrayList<>();
-        for (Map.Entry<String, Integer> entry : monthCounts.entrySet()) {
+        for (Map.Entry<String, Integer> entry : weekCounts.entrySet()) {
             chartData.add(new DashboardDTO.ChartData(entry.getKey(), entry.getValue()));
         }
         // ensure we have something

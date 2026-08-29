@@ -7,8 +7,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
-
+import com.example.StitchEase.model.User;
 @Entity
 @Table(name = "designs")
 @Data
@@ -17,6 +18,10 @@ public class Design {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // Changed to Long with auto-generation
+
+    @ManyToOne
+    @jakarta.persistence.JoinColumn(name = "tailor_id")
+    private User tailor;
 
     private String title;
     private String category;
@@ -28,4 +33,16 @@ public class Design {
 
     @OneToMany(mappedBy = "design", cascade = CascadeType.ALL, orphanRemoval = true)
     private java.util.List<DesignColorVariant> colorVariants;
+
+    @OneToMany(mappedBy = "design", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<DesignPersonalizeDetail> personalizeDetails;
+
+    @jakarta.persistence.Transient
+    private String tailorName;
+
+    @jakarta.persistence.Transient
+    private String shopName;
+
+    @jakarta.persistence.Transient
+    private String location;
 }

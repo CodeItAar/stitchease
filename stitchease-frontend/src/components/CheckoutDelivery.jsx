@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Search, ShoppingBag, Truck, Store, MapPin, CheckCircle, Package } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 
 export default function CheckoutDelivery() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { state } = location;
+  const { state } = location || {};
+
+  const { user } = useContext(AuthContext);
 
   const totalPrice = state?.totalPrice || 14500;
   
@@ -28,7 +31,7 @@ export default function CheckoutDelivery() {
   useEffect(() => {
     const fetchAddresses = async () => {
       try {
-        const userId = 1; // Mocking logged-in user ID
+        const userId = user?.id || 1; 
         const response = await axios.get(`http://localhost:8080/api/addresses/user/${userId}`);
         setSavedAddresses(response.data);
       } catch (error) {
@@ -36,7 +39,7 @@ export default function CheckoutDelivery() {
       }
     };
     fetchAddresses();
-  }, []);
+  }, [user]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -48,11 +51,12 @@ export default function CheckoutDelivery() {
 
   const handleContinue = async () => {
     try {
-      const userId = 1;
+      const userId = user?.id || 1;
       let addressId = null;
 
       if (deliveryMethod === 'home' && formData.saveAddress) {
         const payload = {
+          user: { id: userId },
           fullName: formData.fullName,
           phoneNumber: formData.phoneNumber,
           streetAddress: formData.streetAddress,

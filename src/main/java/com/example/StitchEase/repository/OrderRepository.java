@@ -14,6 +14,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     // Fetch all orders for a specific user
     List<Order> findByUserId(Long userId);
 
+    // Fetch all orders for a specific tailor
+    List<Order> findByTailorId(Long tailorId);
+
     // Filter all orders across the platform by status (e.g., PLACED, IN_PROGRESS, COMPLETED)
     List<Order> findByStatusIgnoreCase(String status);
 
@@ -28,4 +31,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     // Fetch user orders with pagination
     Page<Order> findByUserId(Long userId, Pageable pageable);
+
+    // Fetch tailor orders with pagination
+    Page<Order> findByTailorId(Long tailorId, Pageable pageable);
 }

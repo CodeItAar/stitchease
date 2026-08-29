@@ -2,12 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Check, Edit, Lock } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
+import { useContext } from 'react';
 
 export default function CheckoutReview() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { state } = location || {};
+
+  const { user } = useContext(AuthContext);
 
   const [loading, setLoading] = useState(false);
   const [design, setDesign] = useState(null);
@@ -47,16 +51,15 @@ export default function CheckoutReview() {
       const payload = {
         totalPrice: totalPrice,
         status: 'PLACED',
-        userId: 1, // Mocked user ID
+        userId: user?.id || 1, 
         measurementId: state?.measurementId || 1, 
         deliveryMethod: deliveryMethod,
         shippingAddressId: deliveryMethod === 'home' ? addressId : null,
         designId: id
       };
 
-      await axios.post('http://localhost:8080/api/orders/create', payload);
-      alert('Order placed successfully!');
-      // navigate(`/checkout-confirm/${id}`);
+      const response = await axios.post('http://localhost:8080/api/orders/create', payload);
+      navigate(`/checkout-confirm/${id}`, { state: { orderId: response.data.id, design: design } });
     } catch (error) {
       console.error('Error placing order:', error);
       alert('Failed to place order. Please try again.');
@@ -183,7 +186,7 @@ export default function CheckoutReview() {
                         </div>
                         <div style={{ background: '#fcfaf7', padding: '0.8rem', borderRadius: '6px', textAlign: 'center' }}>
                           <div style={{ color: '#888', fontSize: '0.7rem', marginBottom: '0.3rem' }}>Length</div>
-                          <div style={{ color: '#1a1a1a', fontWeight: 'bold', fontSize: '1rem' }}>{measurement?.length ? `${measurement.length}"` : '42"'}</div>
+                          <div style={{ color: '#1a1a1a', fontWeight: 'bold', fontSize: '1rem' }}>{measurement?.inseam ? `${measurement.inseam}"` : (measurement?.length ? `${measurement.length}"` : '42"')}</div>
                         </div>
                       </div>
                     </div>

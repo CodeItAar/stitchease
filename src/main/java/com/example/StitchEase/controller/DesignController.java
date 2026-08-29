@@ -12,11 +12,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.List;
 import java.util.UUID;
 import com.example.StitchEase.model.DesignColorVariant;
+import com.example.StitchEase.model.User;
 import com.example.StitchEase.repository.DesignColorVariantRepository;
 
 @RestController
@@ -30,18 +33,24 @@ public class DesignController {
     // Final variable for immutable dependency injection
     private final DesignRepository designRepository;
     private final DesignColorVariantRepository designColorVariantRepository;
+    private final com.example.StitchEase.repository.TailorProfileRepository tailorProfileRepository;
+    private final com.example.StitchEase.repository.DesignPersonalizeDetailRepository designPersonalizeDetailRepository;
 
     // Constructor Injection (Fixes 'Field injection is not recommended' warning)
-    public DesignController(DesignRepository designRepository, DesignColorVariantRepository designColorVariantRepository) {
+    public DesignController(DesignRepository designRepository, DesignColorVariantRepository designColorVariantRepository, com.example.StitchEase.repository.TailorProfileRepository tailorProfileRepository, com.example.StitchEase.repository.DesignPersonalizeDetailRepository designPersonalizeDetailRepository) {
         this.designRepository = designRepository;
         this.designColorVariantRepository = designColorVariantRepository;
+        this.tailorProfileRepository = tailorProfileRepository;
+        this.designPersonalizeDetailRepository = designPersonalizeDetailRepository;
     }
 
     // Public: Fetch all catalog designs
     @Operation(summary = "Get all designs")
     @GetMapping("")
     public ResponseEntity<List<Design>> getAllDesigns() {
-        return ResponseEntity.ok(designRepository.findAll());
+        List<Design> designs = designRepository.findAll();
+        populateTailorDetails(designs);
+        return ResponseEntity.ok(designs);
     }
 
     // Public: Fetch a specific design by ID
@@ -62,18 +71,21 @@ public class DesignController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String outfit
     ) {
-        return designRepository.filterDesigns(
+        List<Design> designs = designRepository.filterDesigns(
                 (age != null && !age.isEmpty()) ? age : null,
                 (gender != null && !gender.isEmpty()) ? gender : null,
                 (category != null && !category.isEmpty()) ? category : null,
                 (outfit != null && !outfit.isEmpty()) ? outfit : null
         );
+        populateTailorDetails(designs);
+        return designs;
     }
 
     // Admin/Tailor: Upload new design card with JPG/JPEG/PNG file
     @Operation(summary = "Upload a new design with an image file (JPG, JPEG, PNG)")
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> createDesign(
+            @RequestParam(value = "tailorId", required = false) Long tailorId,
             @RequestParam("title") String title,
             @RequestParam("category") String category,
             @RequestParam("ageDemographics") String ageDemographics,
@@ -93,6 +105,12 @@ public class DesignController {
             design.setOutfitType(outfitType);
             design.setBasePrice(basePrice);
             design.setSampleImage(imageUrl);
+
+            if (tailorId != null) {
+                com.example.StitchEase.model.User tailor = new com.example.StitchEase.model.User();
+                tailor.setId(tailorId);
+                design.setTailor(tailor);
+            }
 
             Design savedDesign = designRepository.save(design);
             return ResponseEntity.status(HttpStatus.CREATED).body(savedDesign);
@@ -172,17 +190,47 @@ public class DesignController {
 
     // Admin/Tailor: Delete color variant
     @Operation(summary = "Delete a color variant from a design")
-    @DeleteMapping("/{designId}/colors/{colorId}")
-    public ResponseEntity<String> deleteColorVariant(@PathVariable Long designId, @PathVariable Long colorId) {
-        DesignColorVariant variant = designColorVariantRepository.findById(colorId)
-                .orElseThrow(() -> new ResourceNotFoundException("Color variant not found with ID: " + colorId));
-
-        if (!variant.getDesign().getId().equals(designId)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Color variant does not belong to this design");
+    @DeleteMapping("/{id}/colors/{colorId}")
+    public ResponseEntity<Void> deleteColorVariant(@PathVariable Long id, @PathVariable Long colorId) {
+        Design design = designRepository.findById(id).orElse(null);
+        if (design == null) {
+            return ResponseEntity.notFound().build();
         }
 
-        designColorVariantRepository.delete(variant);
-        return ResponseEntity.ok("Color variant deleted successfully");
+        designColorVariantRepository.deleteById(colorId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Add a personalize detail to a design")
+    @PostMapping("/{id}/personalize")
+    public ResponseEntity<com.example.StitchEase.model.DesignPersonalizeDetail> addPersonalizeDetail(
+            @PathVariable Long id,
+            @RequestParam String name,
+            @RequestParam Double priceModifier) {
+        Design design = designRepository.findById(id).orElse(null);
+        if (design == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        com.example.StitchEase.model.DesignPersonalizeDetail detail = new com.example.StitchEase.model.DesignPersonalizeDetail();
+        detail.setDesign(design);
+        detail.setName(name);
+        detail.setPriceModifier(priceModifier);
+
+        com.example.StitchEase.model.DesignPersonalizeDetail savedDetail = designPersonalizeDetailRepository.save(detail);
+        return ResponseEntity.ok(savedDetail);
+    }
+
+    @Operation(summary = "Delete a personalize detail from a design")
+    @DeleteMapping("/{id}/personalize/{detailId}")
+    public ResponseEntity<Void> deletePersonalizeDetail(@PathVariable Long id, @PathVariable Long detailId) {
+        Design design = designRepository.findById(id).orElse(null);
+        if (design == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        designPersonalizeDetailRepository.deleteById(detailId);
+        return ResponseEntity.ok().build();
     }
 
     // Helper method using modern Java NIO (Fixes 'Result of File.mkdirs() is ignored' warning)
@@ -211,5 +259,33 @@ public class DesignController {
                 .path("/uploads/")
                 .path(uniqueFileName)
                 .toUriString();
+    }
+
+    private void populateTailorDetails(List<Design> designs) {
+        if (designs == null || designs.isEmpty()) return;
+        List<Long> tailorIds = designs.stream()
+                .map(Design::getTailor)
+                .filter(java.util.Objects::nonNull)
+                .map(com.example.StitchEase.model.User::getId)
+                .distinct()
+                .collect(java.util.stream.Collectors.toList());
+
+        if (tailorIds.isEmpty()) return;
+
+        List<com.example.StitchEase.model.TailorProfile> profiles = tailorProfileRepository.findAll();
+        java.util.Map<Long, com.example.StitchEase.model.TailorProfile> profileMap = profiles.stream()
+                .filter(p -> p.getUser() != null)
+                .collect(java.util.stream.Collectors.toMap(p -> p.getUser().getId(), p -> p, (p1, p2) -> p1));
+
+        for (Design design : designs) {
+            if (design.getTailor() != null) {
+                design.setTailorName(design.getTailor().getName());
+                com.example.StitchEase.model.TailorProfile profile = profileMap.get(design.getTailor().getId());
+                if (profile != null) {
+                    design.setShopName(profile.getShopName());
+                    design.setLocation(profile.getLocation());
+                }
+            }
+        }
     }
 }

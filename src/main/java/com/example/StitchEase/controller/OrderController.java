@@ -38,6 +38,9 @@ public class OrderController {
     private MeasurementRepository measurementRepository;
 
     @Autowired
+    private com.example.StitchEase.repository.DesignRepository designRepository;
+
+    @Autowired
     private OrderMapper orderMapper;
 
     @Operation(summary = "Create a new order", description = "Validates payload and links persistent user and measurement entities.")
@@ -62,9 +65,14 @@ public class OrderController {
             order.setShippingAddressId(requestDTO.getShippingAddressId());
         }
         if (requestDTO.getDesignId() != null) {
-            com.example.StitchEase.model.Design design = new com.example.StitchEase.model.Design();
-            design.setId(requestDTO.getDesignId());
+            com.example.StitchEase.model.Design design = designRepository.findById(requestDTO.getDesignId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Design not found with ID: " + requestDTO.getDesignId()));
             order.setDesign(design);
+            
+            // Assign the tailor from the design to the order
+            if (design.getTailor() != null) {
+                order.setTailor(design.getTailor());
+            }
         }
 
         Order savedOrder = orderRepository.save(order);
@@ -73,12 +81,19 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
-    @Operation(summary = "Get all orders (Paginated & Sorted)", description = "Fetches a paginated list of all orders across the platform.")
+    @Operation(summary = "Get all orders (Paginated & Sorted)", description = "Fetches a paginated list of all orders. Optionally filters by tailorId.")
     @GetMapping("")
     public ResponseEntity<Page<OrderResponseDTO>> getAllOrdersPaginated(
+            @RequestParam(required = false) Long tailorId,
             @ParameterObject Pageable pageable) {
 
-        Page<Order> orderPage = orderRepository.findAll(pageable);
+        Page<Order> orderPage;
+        if (tailorId != null) {
+            orderPage = orderRepository.findByTailorId(tailorId, pageable);
+        } else {
+            orderPage = orderRepository.findAll(pageable);
+        }
+        
         Page<OrderResponseDTO> dtoPage = orderPage.map(orderMapper::toResponseDTO);
 
         return ResponseEntity.ok(dtoPage);

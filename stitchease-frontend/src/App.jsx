@@ -8,12 +8,14 @@ import ExploreDesigns from './components/ExploreDesigns';
 import CustomerProfile from './components/CustomerProfile';
 import TailorDashboard from './components/TailorDashboard';
 import TailorProfile from './components/TailorProfile';
+import TailorOrderManagement from './components/TailorOrderManagement';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import DesignCustomization from './components/DesignCustomization';
 import CheckoutMeasurements from './components/CheckoutMeasurements';
 import CheckoutDelivery from './components/CheckoutDelivery';
 import CheckoutReview from './components/CheckoutReview';
+import CheckoutConfirm from './components/CheckoutConfirm';
 
 export default function App() {
   return (
@@ -38,6 +40,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <TailorDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/orders" 
+            element={
+              <ProtectedRoute>
+                <TailorOrderManagement />
               </ProtectedRoute>
             } 
           />
@@ -94,6 +104,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <CheckoutReview />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/checkout-confirm/:id" 
+            element={
+              <ProtectedRoute>
+                <CheckoutConfirm />
               </ProtectedRoute>
             } 
           />

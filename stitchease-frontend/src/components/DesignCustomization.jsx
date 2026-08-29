@@ -47,7 +47,7 @@ export default function DesignCustomization() {
 
   const fabrics = options.filter(o => o.category === 'FABRIC');
   const colors = design?.colorVariants || [];
-  const details = options.filter(o => o.category === 'DETAIL');
+  const details = design?.personalizeDetails || [];
 
   const handleDetailToggle = (detail) => {
     if (selectedDetails.some(d => d.id === detail.id)) {

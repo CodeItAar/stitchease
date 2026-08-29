@@ -10,7 +10,6 @@ export default function Sidebar() {
         { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/admin' },
         { name: 'Orders', icon: <ShoppingCart size={20} />, path: '/admin/orders' },
         { name: 'Designs', icon: <Scissors size={20} />, path: '/admin/designs' },
-        { name: 'Settings', icon: <Settings size={20} />, path: '/admin/settings' },
     ];
 
     return (

@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import heroImage from '../assets/hero.png';
+import heroImage from '../assets/hero.jpg';
 
 export default function LandingPage() {
   const { user } = useContext(AuthContext);

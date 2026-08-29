@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Search, ShoppingBag, CheckCircle, Video } from 'lucide-react';
+import { AuthContext } from '../context/AuthContext';
 
 export default function CheckoutMeasurements() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { state } = location;
+
+  const { user } = useContext(AuthContext);
 
   // The state from DesignCustomization.jsx might contain selected details and price
   const totalPrice = state?.totalPrice || 0;
@@ -27,15 +30,16 @@ export default function CheckoutMeasurements() {
 
   React.useEffect(() => {
     const fetchProfiles = async () => {
+      if (!user?.id) return;
       try {
-        const response = await axios.get('http://localhost:8080/api/measurements/user/1');
+        const response = await axios.get(`http://localhost:8080/api/measurements/user/${user.id}`);
         setSavedProfiles(response.data);
       } catch (error) {
         console.error('Error fetching measurements:', error);
       }
     };
     fetchProfiles();
-  }, []);
+  }, [user]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -43,11 +47,8 @@ export default function CheckoutMeasurements() {
 
   const handleContinue = async () => {
     try {
-      // Mocking a user ID for now since auth isn't fully integrated everywhere
-      const userId = 1; 
-
       const payload = {
-        user: { id: userId },
+        user: { id: user?.id || 1 },
         bustChest: parseFloat(formData.chest),
         shoulder: parseFloat(formData.shoulderWidth),
         sleeveLength: parseFloat(formData.sleeveLength),

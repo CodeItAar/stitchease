@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getAllDesigns, deleteDesign } from '../services/designService';
 import AddDesignModal from './AddDesignModal';
 import ManageColorsModal from './ManageColorsModal';
+import ManageDetailsModal from './ManageDetailsModal';
 import Sidebar from './Sidebar';
 
 export default function Dashboard() {
@@ -13,6 +14,9 @@ export default function Dashboard() {
   
   const [isColorsModalOpen, setIsColorsModalOpen] = useState(false);
   const [designForColors, setDesignForColors] = useState(null);
+
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [designForDetails, setDesignForDetails] = useState(null);
 
   const loadDesigns = async () => {
     try {
@@ -42,6 +46,11 @@ export default function Dashboard() {
   const handleManageColors = (design) => {
     setDesignForColors(design);
     setIsColorsModalOpen(true);
+  };
+
+  const handleManageDetails = (design) => {
+    setDesignForDetails(design);
+    setIsDetailsModalOpen(true);
   };
 
   return (
@@ -138,23 +147,32 @@ export default function Dashboard() {
                     {item.colorVariants && item.colorVariants.length > 0 && (
                         <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: '#5a0f28' }}>{item.colorVariants.length} variants</p>
                     )}
+                    {item.personalizeDetails && item.personalizeDetails.length > 0 && (
+                        <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: '#d4af37' }}>{item.personalizeDetails.length} details</p>
+                    )}
                   </div>
                   <div style={{ display: 'flex', borderTop: '1px solid #e2e8f0', marginTop: 'auto' }}>
                     <button 
                       onClick={() => handleManageColors(item)}
-                      style={{ flex: 1, padding: '0.5rem', border: 'none', borderRight: '1px solid #e2e8f0', background: '#f8fafc', cursor: 'pointer', color: '#0f172a' }}
+                      style={{ flex: 1, padding: '0.5rem', border: 'none', borderRight: '1px solid #e2e8f0', background: '#f8fafc', cursor: 'pointer', color: '#0f172a', fontSize: '0.8rem' }}
                     >
                       🎨 Colors
                     </button>
                     <button 
+                      onClick={() => handleManageDetails(item)}
+                      style={{ flex: 1, padding: '0.5rem', border: 'none', borderRight: '1px solid #e2e8f0', background: '#fdfbf7', cursor: 'pointer', color: '#0f172a', fontSize: '0.8rem' }}
+                    >
+                      ✨ Details
+                    </button>
+                    <button 
                       onClick={() => handleEdit(item)}
-                      style={{ flex: 1, padding: '0.5rem', border: 'none', borderRight: '1px solid #e2e8f0', background: 'none', cursor: 'pointer' }}
+                      style={{ flex: 1, padding: '0.5rem', border: 'none', borderRight: '1px solid #e2e8f0', background: 'none', cursor: 'pointer', fontSize: '0.8rem' }}
                     >
                       ✏️ Edit
                     </button>
                     <button
                         onClick={() => handleDelete(item.id)}
-                        style={{ flex: 1, padding: '0.5rem', border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer' }}
+                        style={{ flex: 1, padding: '0.5rem', border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.8rem' }}
                     >
                       🗑️
                     </button>
@@ -190,6 +208,30 @@ export default function Dashboard() {
                         const updatedDesign = data.find(d => d.id === designForColors.id);
                         if (updatedDesign) {
                             setDesignForColors(updatedDesign);
+                        }
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            }}
+        />
+
+        <ManageDetailsModal
+            isOpen={isDetailsModalOpen}
+            onClose={() => {
+              setIsDetailsModalOpen(false);
+              setDesignForDetails(null);
+            }}
+            design={designForDetails}
+            onSuccess={async () => {
+                // reload designs and update the currently selected design for details
+                try {
+                    const data = await getAllDesigns();
+                    setDesigns(data);
+                    if (designForDetails) {
+                        const updatedDesign = data.find(d => d.id === designForDetails.id);
+                        if (updatedDesign) {
+                            setDesignForDetails(updatedDesign);
                         }
                     }
                 } catch (err) {

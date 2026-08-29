@@ -6,11 +6,16 @@ import { useNavigate } from 'react-router-dom';
 export default function CustomerProfile() {
   const { user, logoutUser } = useContext(AuthContext);
   const [wishlist, setWishlist] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [measurements, setMeasurements] = useState([]);
+  const [isOrderHistoryModalOpen, setIsOrderHistoryModalOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
       fetchWishlist();
+      fetchOrders();
+      fetchMeasurements();
     }
   }, [user]);
 
@@ -20,6 +25,30 @@ export default function CustomerProfile() {
       setWishlist(data);
     } catch (error) {
       console.error('Error fetching wishlist:', error);
+    }
+  };
+
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/orders/user/${user.id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setOrders(data);
+      }
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+    }
+  };
+
+  const fetchMeasurements = async () => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/measurements/user/${user.id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setMeasurements(data);
+      }
+    } catch (error) {
+      console.error('Error fetching measurements:', error);
     }
   };
 
@@ -63,10 +92,10 @@ export default function CustomerProfile() {
             <div style={{ backgroundColor: '#fdf1dc', color: '#8c591a', padding: '1rem', borderRadius: '8px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer' }}>
               👤 Profile Info
             </div>
-            <div style={{ padding: '1rem', color: '#555', display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', borderRadius: '8px' }}>
+            <div onClick={() => document.getElementById('measurements-section').scrollIntoView({ behavior: 'smooth' })} style={{ padding: '1rem', color: '#555', display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', borderRadius: '8px' }}>
               📏 Measurement Profiles
             </div>
-            <div style={{ padding: '1rem', color: '#555', display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', borderRadius: '8px' }}>
+            <div onClick={() => document.getElementById('orders-section').scrollIntoView({ behavior: 'smooth' })} style={{ padding: '1rem', color: '#555', display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', borderRadius: '8px' }}>
               📦 Order History
             </div>
             <div onClick={() => document.getElementById('wishlist-section').scrollIntoView({ behavior: 'smooth' })} style={{ padding: '1rem', color: '#555', display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', borderRadius: '8px' }}>
@@ -107,28 +136,28 @@ export default function CustomerProfile() {
             <div style={{ backgroundColor: '#fff', padding: '1.5rem', borderRadius: '12px', border: '1px solid #eaeaea', display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#ffecec', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#ff6b6b' }}>📦</div>
               <div>
-                <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>12</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{orders.length}</div>
                 <div style={{ fontSize: '0.7rem', color: '#888', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Total Orders</div>
               </div>
             </div>
             <div style={{ backgroundColor: '#fff', padding: '1.5rem', borderRadius: '12px', border: '1px solid #eaeaea', display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#fff4cc', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#d4a300' }}>🚚</div>
               <div>
-                <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>2</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{orders.filter(o => o.status !== 'COMPLETED' && o.status !== 'DELIVERED').length}</div>
                 <div style={{ fontSize: '0.7rem', color: '#888', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Active Orders</div>
               </div>
             </div>
             <div style={{ backgroundColor: '#fff', padding: '1.5rem', borderRadius: '12px', border: '1px solid #eaeaea', display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#e0f4eb', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#27a972' }}>📏</div>
               <div>
-                <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>5</div>
+                <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{measurements.length}</div>
                 <div style={{ fontSize: '0.7rem', color: '#888', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Saved Measurements</div>
               </div>
             </div>
           </div>
 
           {/* Measurement Profiles */}
-          <div style={{ marginTop: '1rem' }}>
+          <div id="measurements-section" style={{ marginTop: '1rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <h3 style={{ margin: 0, fontFamily: '"Playfair Display", serif', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.3rem' }}>
                 📏 Measurement Profiles
@@ -136,31 +165,22 @@ export default function CustomerProfile() {
               <span style={{ fontSize: '0.8rem', color: '#5a0f28', fontWeight: 'bold', cursor: 'pointer' }}>View All →</span>
             </div>
             
-            <div style={{ display: 'flex', gap: '1.5rem' }}>
-              <div style={{ flex: 1, backgroundColor: '#fff', padding: '1.5rem', borderRadius: '12px', border: '1px solid #eaeaea' }}>
-                <span style={{ fontSize: '0.6rem', padding: '0.2rem 0.5rem', backgroundColor: '#ffecec', color: '#ff6b6b', borderRadius: '4px', fontWeight: 'bold', letterSpacing: '0.5px' }}>PRIMARY</span>
-                <h4 style={{ margin: '0.8rem 0 0.3rem 0', fontSize: '1.1rem' }}>My Primary Fit</h4>
-                <div style={{ fontSize: '0.8rem', color: '#888', marginBottom: '1.5rem' }}>Last updated: Oct 12, 2023</div>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', fontSize: '0.9rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#555' }}>Chest</span><span style={{ fontWeight: 'bold' }}>42"</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#555' }}>Waist</span><span style={{ fontWeight: 'bold' }}>34"</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#555' }}>Shoulder</span><span style={{ fontWeight: 'bold' }}>18.5"</span></div>
+            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+              {measurements.map((measurement, idx) => (
+                <div key={idx} style={{ flex: '1 1 300px', backgroundColor: '#fff', padding: '1.5rem', borderRadius: '12px', border: '1px solid #eaeaea' }}>
+                  {idx === 0 && <span style={{ fontSize: '0.6rem', padding: '0.2rem 0.5rem', backgroundColor: '#ffecec', color: '#ff6b6b', borderRadius: '4px', fontWeight: 'bold', letterSpacing: '0.5px' }}>PRIMARY</span>}
+                  <h4 style={{ margin: idx === 0 ? '0.8rem 0 0.3rem 0' : '0 0 0.3rem 0', fontSize: '1.1rem' }}>Profile {idx + 1}</h4>
+                  <div style={{ fontSize: '0.8rem', color: '#888', marginBottom: '1.5rem' }}>Added custom fit</div>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', fontSize: '0.9rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#555' }}>Chest</span><span style={{ fontWeight: 'bold' }}>{measurement.bustChest ? `${measurement.bustChest}"` : '-'}</span></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#555' }}>Waist</span><span style={{ fontWeight: 'bold' }}>{measurement.waist ? `${measurement.waist}"` : '-'}</span></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#555' }}>Shoulder</span><span style={{ fontWeight: 'bold' }}>{measurement.shoulder ? `${measurement.shoulder}"` : '-'}</span></div>
+                  </div>
                 </div>
-              </div>
+              ))}
 
-              <div style={{ flex: 1, backgroundColor: '#fff', padding: '1.5rem', borderRadius: '12px', border: '1px solid #eaeaea' }}>
-                <h4 style={{ margin: '0 0 0.3rem 0', fontSize: '1.1rem' }}>Wedding Guest Fit</h4>
-                <div style={{ fontSize: '0.8rem', color: '#888', marginBottom: '1.5rem' }}>Last updated: Aug 05, 2023</div>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', fontSize: '0.9rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#555' }}>Chest</span><span style={{ fontWeight: 'bold' }}>41.5"</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#555' }}>Waist</span><span style={{ fontWeight: 'bold' }}>33.5"</span></div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: '#555' }}>Shoulder</span><span style={{ fontWeight: 'bold' }}>18"</span></div>
-                </div>
-              </div>
-
-              <div style={{ flex: 1, backgroundColor: '#fcfaf6', padding: '1.5rem', borderRadius: '12px', border: '2px dashed #e0b48a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+              <div style={{ flex: '1 1 300px', backgroundColor: '#fcfaf6', padding: '1.5rem', borderRadius: '12px', border: '2px dashed #e0b48a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', minHeight: '200px' }}>
                 <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#e2d3c5', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#5a0f28', fontSize: '1.5rem', marginBottom: '1rem' }}>+</div>
                 <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem' }}>Add New Profile</h4>
                 <p style={{ margin: 0, fontSize: '0.8rem', color: '#888', textAlign: 'center' }}>Create a new measurement set for a different fit style.</p>
@@ -169,44 +189,50 @@ export default function CustomerProfile() {
           </div>
 
           {/* Recent Orders */}
-          <div style={{ marginTop: '1rem' }}>
+          <div id="orders-section" style={{ marginTop: '1rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
               <h3 style={{ margin: 0, fontFamily: '"Playfair Display", serif', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.3rem' }}>
                 📦 Recent Orders
               </h3>
-              <span style={{ fontSize: '0.8rem', color: '#5a0f28', fontWeight: 'bold', cursor: 'pointer' }}>Order History →</span>
+              <span 
+                onClick={() => setIsOrderHistoryModalOpen(true)}
+                style={{ fontSize: '0.8rem', color: '#5a0f28', fontWeight: 'bold', cursor: 'pointer' }}
+              >
+                Order History →
+              </span>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff', padding: '1.5rem', borderRadius: '12px', border: '1px solid #eaeaea' }}>
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                  <div style={{ width: '60px', height: '60px', backgroundColor: '#1f2937', borderRadius: '8px' }}></div>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.3rem' }}>
-                      <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>SE-9421</span>
-                      <span style={{ fontSize: '0.6rem', padding: '0.2rem 0.5rem', backgroundColor: '#fff4cc', color: '#d4a300', borderRadius: '4px', fontWeight: 'bold', letterSpacing: '0.5px' }}>SHIPPED</span>
-                    </div>
-                    <h4 style={{ margin: '0 0 0.2rem 0', fontSize: '1.1rem' }}>Bespoke Navy Pinstripe Suit</h4>
-                    <div style={{ fontSize: '0.85rem', color: '#888' }}>Placed on Nov 28, 2023</div>
-                  </div>
+              {orders.length === 0 ? (
+                <div style={{ padding: '2rem', textAlign: 'center', color: '#888', backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #eaeaea' }}>
+                  No recent orders.
                 </div>
-                <button style={{ padding: '0.6rem 1.2rem', backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' }}>Track Order</button>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff', padding: '1.5rem', borderRadius: '12px', border: '1px solid #eaeaea' }}>
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                  <div style={{ width: '60px', height: '60px', backgroundColor: '#fcfaf6', border: '1px solid #eaeaea', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.5rem' }}>✂️</div>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.3rem' }}>
-                      <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>SE-8832</span>
-                      <span style={{ fontSize: '0.6rem', padding: '0.2rem 0.5rem', backgroundColor: '#e0f4eb', color: '#27a972', borderRadius: '4px', fontWeight: 'bold', letterSpacing: '0.5px' }}>IN CRAFTING</span>
+              ) : (
+                [...orders].sort((a, b) => b.id - a.id).slice(0, 5).map((order, idx) => (
+                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff', padding: '1.5rem', borderRadius: '12px', border: '1px solid #eaeaea' }}>
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                      <div style={{ width: '60px', height: '60px', backgroundColor: '#1f2937', borderRadius: '8px', overflow: 'hidden' }}>
+                        {order.design && order.design.sampleImage ? (
+                          <img src={order.design.sampleImage} alt="Design" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.5rem' }}>✂️</div>
+                        )}
+                      </div>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.3rem' }}>
+                          <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>SE-{order.id}</span>
+                          <span style={{ fontSize: '0.6rem', padding: '0.2rem 0.5rem', backgroundColor: order.status === 'COMPLETED' ? '#e0f4eb' : '#fff4cc', color: order.status === 'COMPLETED' ? '#27a972' : '#d4a300', borderRadius: '4px', fontWeight: 'bold', letterSpacing: '0.5px' }}>{order.status}</span>
+                        </div>
+                        <h4 style={{ margin: '0 0 0.2rem 0', fontSize: '1.1rem' }}>
+                          {order.design ? order.design.title : (order.customRequest ? 'Custom Request' : 'Order')}
+                        </h4>
+                        <div style={{ fontSize: '0.85rem', color: '#888' }}>Placed on {new Date(order.createdAt).toLocaleDateString()}</div>
+                      </div>
                     </div>
-                    <h4 style={{ margin: '0 0 0.2rem 0', fontSize: '1.1rem' }}>Classic White Linen Shirt</h4>
-                    <div style={{ fontSize: '0.85rem', color: '#888' }}>Placed on Dec 02, 2023</div>
+                    <button style={{ padding: '0.6rem 1.2rem', backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' }}>View Details</button>
                   </div>
-                </div>
-                <button style={{ padding: '0.6rem 1.2rem', backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' }}>View Details</button>
-              </div>
+                ))
+              )}
             </div>
           </div>
 
@@ -247,6 +273,60 @@ export default function CustomerProfile() {
           
         </main>
       </div>
+
+      {/* Order History Modal */}
+      {isOrderHistoryModalOpen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000,
+          display: 'flex', justifyContent: 'center', alignItems: 'center'
+        }}>
+          <div style={{
+            backgroundColor: '#fff', borderRadius: '8px', padding: '2rem',
+            width: '800px', maxWidth: '90%', maxHeight: '90vh', overflowY: 'auto'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h2 style={{ margin: 0, color: '#5a0f28', fontFamily: '"Playfair Display", serif' }}>
+                Order History
+              </h2>
+              <button onClick={() => setIsOrderHistoryModalOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>×</button>
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {orders.length === 0 ? (
+                <div style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>
+                  No orders found.
+                </div>
+              ) : (
+                [...orders].sort((a, b) => b.id - a.id).map((order, idx) => (
+                  <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff', padding: '1.5rem', borderRadius: '12px', border: '1px solid #eaeaea' }}>
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                      <div style={{ width: '60px', height: '60px', backgroundColor: '#1f2937', borderRadius: '8px', overflow: 'hidden' }}>
+                        {order.design && order.design.sampleImage ? (
+                          <img src={order.design.sampleImage} alt="Design" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                          <div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.5rem' }}>✂️</div>
+                        )}
+                      </div>
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginBottom: '0.3rem' }}>
+                          <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>SE-{order.id}</span>
+                          <span style={{ fontSize: '0.6rem', padding: '0.2rem 0.5rem', backgroundColor: order.status === 'COMPLETED' ? '#e0f4eb' : '#fff4cc', color: order.status === 'COMPLETED' ? '#27a972' : '#d4a300', borderRadius: '4px', fontWeight: 'bold', letterSpacing: '0.5px' }}>{order.status}</span>
+                        </div>
+                        <h4 style={{ margin: '0 0 0.2rem 0', fontSize: '1.1rem' }}>
+                          {order.design ? order.design.title : (order.customRequest ? 'Custom Request' : 'Order')}
+                        </h4>
+                        <div style={{ fontSize: '0.85rem', color: '#888' }}>Placed on {new Date(order.createdAt).toLocaleDateString()}</div>
+                      </div>
+                    </div>
+                    <button style={{ padding: '0.6rem 1.2rem', backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' }}>View Details</button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Footer */}
       <footer style={{ backgroundColor: '#f5f0e6', padding: '3rem 0', textAlign: 'center' }}>

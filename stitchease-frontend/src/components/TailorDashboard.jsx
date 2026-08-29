@@ -16,7 +16,7 @@ export default function TailorDashboard() {
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/api/admin/dashboard');
+                const response = await axios.get(`http://localhost:8080/api/admin/dashboard${user && user.id ? `?tailorId=${user.id}` : ''}`);
                 setDashboardData(response.data);
             } catch (error) {
                 console.error('Error fetching dashboard data:', error);
@@ -86,7 +86,7 @@ export default function TailorDashboard() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
                             <h3 style={{ margin: 0, color: '#333', fontSize: '1.1rem' }}>Orders Over Time</h3>
                             <select style={{ padding: '0.4rem', borderRadius: '6px', border: '1px solid #eee', fontSize: '0.85rem' }}>
-                                <option>Last 12 Months</option>
+                                <option>Last 12 Weeks</option>
                             </select>
                         </div>
                         <div style={{ height: '250px' }}>

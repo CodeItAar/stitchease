@@ -203,6 +203,24 @@ export default function ExploreDesigns() {
               </div>
               <div style={{ padding: '1rem' }}>
                 <h3 style={{ margin: '0 0 0.5rem 0', fontFamily: '"Playfair Display", serif', color: '#333' }}>{design.title}</h3>
+                
+                {/* Tailor Details */}
+                {(design.tailorName || design.shopName) && (
+                  <div style={{ marginBottom: '0.8rem', fontSize: '0.85rem', color: '#666', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <span style={{ fontSize: '1rem' }}>✂️</span>
+                      <span style={{ fontWeight: '500', color: '#5a0f28' }}>{design.shopName || `${design.tailorName}'s Shop`}</span>
+                      {design.tailorName && <span style={{ color: '#888' }}> by {design.tailorName}</span>}
+                    </div>
+                    {design.location && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#888' }}>
+                        <span style={{ fontSize: '0.9rem' }}>📍</span>
+                        <span>{design.location}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <p style={{ margin: '0 0 1rem 0', color: '#777', fontSize: '0.9rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                   {design.description || 'Exquisite custom design'}
                 </p>

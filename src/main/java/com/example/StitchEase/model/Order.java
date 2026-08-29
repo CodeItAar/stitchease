@@ -12,6 +12,10 @@ public class Order {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "tailor_id")
+    private User tailor;
+
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
@@ -42,6 +46,9 @@ public class Order {
     // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public User getTailor() { return tailor; }
+    public void setTailor(User tailor) { this.tailor = tailor; }
 
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }

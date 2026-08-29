@@ -11,6 +11,8 @@ import java.util.List;
 @Repository
 public interface DesignRepository extends JpaRepository<Design, Long> {
 
+    List<Design> findByTailorId(Long tailorId);
+
     @Query("SELECT d FROM Design d WHERE " +
             "(:age IS NULL OR LOWER(d.ageDemographics) LIKE LOWER(CONCAT('%', :age, '%'))) AND " +
             "(:gender IS NULL OR " +
