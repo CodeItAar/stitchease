@@ -21,11 +21,24 @@ public class OrderMapper {
 
         if (order.getMeasurement() != null) {
             dto.setMeasurementId(order.getMeasurement().getId());
+            
+            OrderResponseDTO.MeasurementDetails md = new OrderResponseDTO.MeasurementDetails();
+            md.setBustChest(order.getMeasurement().getBustChest());
+            md.setWaist(order.getMeasurement().getWaist());
+            md.setHips(order.getMeasurement().getHips());
+            md.setShoulder(order.getMeasurement().getShoulder());
+            md.setLength(order.getMeasurement().getLength());
+            md.setSleeveLength(order.getMeasurement().getSleeveLength());
+            md.setNeck(order.getMeasurement().getNeck());
+            md.setInseam(order.getMeasurement().getInseam());
+            md.setAdditionalNotes(order.getMeasurement().getAdditionalNotes());
+            dto.setMeasurement(md);
         }
 
         if (order.getDesign() != null) {
             dto.setDesignId(order.getDesign().getId());
             dto.setDesignTitle(order.getDesign().getTitle());
+            dto.setDesignImageUrl(order.getDesign().getSampleImage());
         }
 
         return dto;

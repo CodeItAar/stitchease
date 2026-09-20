@@ -229,7 +229,7 @@ export default function CustomerProfile() {
                         <div style={{ fontSize: '0.85rem', color: '#888' }}>Placed on {new Date(order.createdAt).toLocaleDateString()}</div>
                       </div>
                     </div>
-                    <button style={{ padding: '0.6rem 1.2rem', backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' }}>View Details</button>
+                    <button onClick={() => navigate(`/order-status/${order.id}`)} style={{ padding: '0.6rem 1.2rem', backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' }}>View Details</button>
                   </div>
                 ))
               )}
@@ -319,7 +319,7 @@ export default function CustomerProfile() {
                         <div style={{ fontSize: '0.85rem', color: '#888' }}>Placed on {new Date(order.createdAt).toLocaleDateString()}</div>
                       </div>
                     </div>
-                    <button style={{ padding: '0.6rem 1.2rem', backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' }}>View Details</button>
+                    <button onClick={() => navigate(`/order-status/${order.id}`)} style={{ padding: '0.6rem 1.2rem', backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '6px', cursor: 'pointer', fontWeight: '500' }}>View Details</button>
                   </div>
                 ))
               )}

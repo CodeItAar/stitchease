@@ -87,7 +87,7 @@ export default function CheckoutConfirm() {
         </div>
 
         <div style={{ display: 'flex', gap: '1.5rem', marginTop: '3rem' }}>
-          <button onClick={() => navigate('/profile')} style={{ backgroundColor: '#5a0f28', color: '#fff', border: 'none', padding: '1rem 2rem', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <button onClick={() => navigate(`/order-status/${orderId}`)} style={{ backgroundColor: '#5a0f28', color: '#fff', border: 'none', padding: '1rem 2rem', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             View Order Status →
           </button>
           <button onClick={() => navigate('/explore')} style={{ backgroundColor: 'transparent', color: '#5a0f28', border: '1px solid #5a0f28', padding: '1rem 2rem', borderRadius: '6px', cursor: 'pointer', fontWeight: '600', fontSize: '1rem' }}>

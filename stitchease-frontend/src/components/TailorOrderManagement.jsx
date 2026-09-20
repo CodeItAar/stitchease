@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, Filter, X, CheckCircle, Clock, Package, CheckSquare } from 'lucide-react';
+import { Search, Filter, X, CheckCircle, Clock, Package, CheckSquare, Trash2 } from 'lucide-react';
 import Sidebar from './Sidebar';
 
 import { AuthContext } from '../context/AuthContext';
@@ -13,6 +13,7 @@ export default function TailorOrderManagement() {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('All Stages');
+    const [showMeasurements, setShowMeasurements] = useState(false);
 
     const fetchOrders = async () => {
         try {
@@ -42,6 +43,20 @@ export default function TailorOrderManagement() {
         }
     };
 
+    const handleDeleteOrder = async (orderId) => {
+        if (!window.confirm(`Are you sure you want to delete Order #SE-${orderId}?`)) {
+            return;
+        }
+        try {
+            await axios.delete(`http://localhost:8080/api/orders/${orderId}`);
+            await fetchOrders();
+            setSelectedOrder(null);
+        } catch (error) {
+            console.error('Error deleting order:', error);
+            alert('Failed to delete order');
+        }
+    };
+
     const filteredOrders = orders.filter(order => {
         const matchesSearch = 
             order.id.toString().includes(searchTerm) || 
@@ -55,6 +70,7 @@ export default function TailorOrderManagement() {
 
     const getStatusColor = (status) => {
         switch (status) {
+            case 'CONFIRMED': return { bg: '#f3f4f6', text: '#4b5563' };
             case 'PLACED': return { bg: '#fef3c7', text: '#b45309' };
             case 'SOURCING': return { bg: '#e0e7ff', text: '#4338ca' };
             case 'STITCHING': return { bg: '#fce7f3', text: '#be185d' };
@@ -90,6 +106,7 @@ export default function TailorOrderManagement() {
                         style={{ padding: '0.6rem', borderRadius: '8px', border: '1px solid #e5e7eb', outline: 'none', backgroundColor: 'white' }}
                     >
                         <option value="All Stages">All Stages</option>
+                        <option value="CONFIRMED">Confirmed</option>
                         <option value="PLACED">Placed</option>
                         <option value="SOURCING">Sourcing</option>
                         <option value="STITCHING">Stitching</option>
@@ -134,7 +151,7 @@ export default function TailorOrderManagement() {
                                             <td style={{ padding: '1rem' }}>
                                                 <div style={{ fontWeight: '500', color: '#111827' }}>{order.userName || `User ${order.userId}`}</div>
                                             </td>
-                                            <td style={{ padding: '1rem', color: '#4b5563' }}>{order.designTitle || `Design ${order.designId}`}</td>
+                                            <td style={{ padding: '1rem', color: '#4b5563' }}>{order.designTitle || (order.designId ? `Design ${order.designId}` : 'Custom Design')}</td>
                                             <td style={{ padding: '1rem', color: '#4b5563' }}>Standard</td>
                                             <td style={{ padding: '1rem' }}>
                                                 <span style={{ 
@@ -163,9 +180,18 @@ export default function TailorOrderManagement() {
                                     <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#111827', fontFamily: '"Playfair Display", serif' }}>Order #SE-{selectedOrder.id} Details</h3>
                                     <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>Placed on {new Date(selectedOrder.createdAt).toLocaleDateString()}</span>
                                 </div>
-                                <button onClick={() => setSelectedOrder(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af' }}>
-                                    <X size={20} />
-                                </button>
+                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                    <button 
+                                        onClick={() => handleDeleteOrder(selectedOrder.id)} 
+                                        style={{ background: '#fef2f2', border: '1px solid #f87171', borderRadius: '4px', padding: '0.4rem', cursor: 'pointer', color: '#ef4444', display: 'flex', alignItems: 'center' }}
+                                        title="Delete Order"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                    <button onClick={() => setSelectedOrder(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', display: 'flex', alignItems: 'center' }}>
+                                        <X size={20} />
+                                    </button>
+                                </div>
                             </div>
 
                             {/* Customer Info */}
@@ -190,7 +216,12 @@ export default function TailorOrderManagement() {
                                         </div>
                                         <div>
                                             <div style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.2rem' }}>MEASUREMENTS</div>
-                                            <div style={{ fontSize: '0.85rem', color: '#5a0f28', textDecoration: 'underline', cursor: 'pointer' }}>View Full Sheet</div>
+                                            <button 
+                                                onClick={() => setShowMeasurements(true)}
+                                                style={{ fontSize: '0.85rem', color: '#5a0f28', textDecoration: 'underline', cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
+                                            >
+                                                View Full Sheet
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -202,9 +233,15 @@ export default function TailorOrderManagement() {
                                     <CheckSquare size={14} /> DESIGN SELECTION
                                 </h4>
                                 <div style={{ display: 'flex', gap: '1rem' }}>
-                                    <div style={{ width: '80px', height: '100px', backgroundColor: '#f3f4f6', borderRadius: '8px' }}></div>
+                                    <div style={{ width: '80px', height: '100px', backgroundColor: '#f3f4f6', borderRadius: '8px', overflow: 'hidden' }}>
+                                        {selectedOrder.designImageUrl ? (
+                                            <img src={selectedOrder.designImageUrl} alt="Design" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.src = 'https://via.placeholder.com/80x100?text=No+Img'; }} />
+                                        ) : (
+                                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', textAlign: 'center', fontSize: '0.8rem' }}>No Image</div>
+                                        )}
+                                    </div>
                                     <div>
-                                        <div style={{ fontWeight: '600', color: '#111827' }}>{selectedOrder.designTitle || `Design ${selectedOrder.designId}`}</div>
+                                        <div style={{ fontWeight: '600', color: '#111827' }}>{selectedOrder.designTitle || (selectedOrder.designId ? `Design ${selectedOrder.designId}` : 'Custom Design')}</div>
                                         <div style={{ fontSize: '0.85rem', color: '#6b7280', marginBottom: '0.5rem' }}>Total Price: ₹{selectedOrder.totalPrice}</div>
                                     </div>
                                 </div>
@@ -216,8 +253,8 @@ export default function TailorOrderManagement() {
                                     <Clock size={14} /> PRODUCTION STAGE
                                 </h4>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginLeft: '0.5rem' }}>
-                                    {['PLACED', 'SOURCING', 'STITCHING', 'QUALITY_CHECK', 'COMPLETED'].map((stage, index) => {
-                                        const stages = ['PLACED', 'SOURCING', 'STITCHING', 'QUALITY_CHECK', 'COMPLETED'];
+                                    {['CONFIRMED', 'PLACED', 'SOURCING', 'STITCHING', 'QUALITY_CHECK', 'COMPLETED'].map((stage, index) => {
+                                        const stages = ['CONFIRMED', 'PLACED', 'SOURCING', 'STITCHING', 'QUALITY_CHECK', 'COMPLETED'];
                                         const currentStageIndex = stages.indexOf(selectedOrder.status);
                                         const isPast = index < currentStageIndex;
                                         const isCurrent = index === currentStageIndex;
@@ -254,42 +291,101 @@ export default function TailorOrderManagement() {
 
                             {/* Action Button */}
                             <div style={{ marginTop: 'auto', paddingTop: '1.5rem' }}>
-                                {selectedOrder.status !== 'COMPLETED' && (
-                                    <button 
-                                        onClick={() => {
-                                            const stages = ['PLACED', 'SOURCING', 'STITCHING', 'QUALITY_CHECK', 'COMPLETED'];
-                                            const nextStage = stages[stages.indexOf(selectedOrder.status) + 1];
-                                            if (nextStage) handleUpdateStatus(selectedOrder.id, nextStage);
-                                        }}
-                                        style={{ 
-                                            width: '100%', 
-                                            padding: '1rem', 
-                                            backgroundColor: '#5a0f28', 
-                                            color: 'white', 
-                                            border: 'none', 
-                                            borderRadius: '8px', 
-                                            fontWeight: '600', 
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            gap: '0.5rem',
-                                            transition: 'background-color 0.2s'
-                                        }}
-                                    >
-                                        Update to {
-                                            selectedOrder.status === 'PLACED' ? 'Sourcing' :
-                                            selectedOrder.status === 'SOURCING' ? 'Stitching' :
-                                            selectedOrder.status === 'STITCHING' ? 'Quality Check' :
-                                            'Completed'
-                                        }
-                                    </button>
-                                )}
+                                <label style={{ fontSize: '0.8rem', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem', display: 'block' }}>
+                                    Update Stage Manually
+                                </label>
+                                <select 
+                                    value={selectedOrder.status}
+                                    onChange={(e) => handleUpdateStatus(selectedOrder.id, e.target.value)}
+                                    style={{ 
+                                        width: '100%', 
+                                        padding: '0.8rem', 
+                                        borderRadius: '8px', 
+                                        border: '1px solid #e5e7eb', 
+                                        outline: 'none',
+                                        backgroundColor: '#f9fafb',
+                                        fontWeight: '500',
+                                        color: '#111827',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    <option value="CONFIRMED">Confirmed</option>
+                                    <option value="PLACED">Placed</option>
+                                    <option value="SOURCING">Sourcing</option>
+                                    <option value="STITCHING">Stitching</option>
+                                    <option value="QUALITY_CHECK">Quality Check</option>
+                                    <option value="COMPLETED">Completed</option>
+                                </select>
                             </div>
                         </div>
                     )}
                 </div>
             </main>
+
+            {/* Measurements Modal */}
+            {showMeasurements && selectedOrder?.measurement && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+                    <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '2rem', width: '90%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid #e5e7eb', paddingBottom: '1rem' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#111827', fontFamily: '"Playfair Display", serif' }}>Customer Measurements</h3>
+                            <button onClick={() => setShowMeasurements(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af' }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                            <div>
+                                <div style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Bust / Chest</div>
+                                <div style={{ fontSize: '1rem', color: '#111827', fontWeight: '500' }}>{selectedOrder.measurement.bustChest || 'N/A'}</div>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Waist</div>
+                                <div style={{ fontSize: '1rem', color: '#111827', fontWeight: '500' }}>{selectedOrder.measurement.waist || 'N/A'}</div>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Hips</div>
+                                <div style={{ fontSize: '1rem', color: '#111827', fontWeight: '500' }}>{selectedOrder.measurement.hips || 'N/A'}</div>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Shoulder</div>
+                                <div style={{ fontSize: '1rem', color: '#111827', fontWeight: '500' }}>{selectedOrder.measurement.shoulder || 'N/A'}</div>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Length</div>
+                                <div style={{ fontSize: '1rem', color: '#111827', fontWeight: '500' }}>{selectedOrder.measurement.length || 'N/A'}</div>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Sleeve Length</div>
+                                <div style={{ fontSize: '1rem', color: '#111827', fontWeight: '500' }}>{selectedOrder.measurement.sleeveLength || 'N/A'}</div>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Neck</div>
+                                <div style={{ fontSize: '1rem', color: '#111827', fontWeight: '500' }}>{selectedOrder.measurement.neck || 'N/A'}</div>
+                            </div>
+                            <div>
+                                <div style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Inseam</div>
+                                <div style={{ fontSize: '1rem', color: '#111827', fontWeight: '500' }}>{selectedOrder.measurement.inseam || 'N/A'}</div>
+                            </div>
+                        </div>
+                        
+                        {selectedOrder.measurement.additionalNotes && (
+                            <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e7eb' }}>
+                                <div style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Additional Notes</div>
+                                <div style={{ fontSize: '0.9rem', color: '#374151', lineHeight: 1.5 }}>{selectedOrder.measurement.additionalNotes}</div>
+                            </div>
+                        )}
+                        
+                        <div style={{ marginTop: '2rem' }}>
+                            <button 
+                                onClick={() => setShowMeasurements(false)}
+                                style={{ width: '100%', padding: '0.8rem', backgroundColor: '#f3f4f6', color: '#374151', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

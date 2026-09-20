@@ -16,6 +16,7 @@ import CheckoutMeasurements from './components/CheckoutMeasurements';
 import CheckoutDelivery from './components/CheckoutDelivery';
 import CheckoutReview from './components/CheckoutReview';
 import CheckoutConfirm from './components/CheckoutConfirm';
+import OrderStatus from './components/OrderStatus';
 
 export default function App() {
   return (
@@ -112,6 +113,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <CheckoutConfirm />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/order-status/:id" 
+            element={
+              <ProtectedRoute>
+                <OrderStatus />
               </ProtectedRoute>
             } 
           />

@@ -81,6 +81,14 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDTO);
     }
 
+    @Operation(summary = "Get an order by ID")
+    @GetMapping("/{orderId}")
+    public ResponseEntity<OrderResponseDTO> getOrderById(@PathVariable Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + orderId));
+        return ResponseEntity.ok(orderMapper.toResponseDTO(order));
+    }
+
     @Operation(summary = "Get all orders (Paginated & Sorted)", description = "Fetches a paginated list of all orders. Optionally filters by tailorId.")
     @GetMapping("")
     public ResponseEntity<Page<OrderResponseDTO>> getAllOrdersPaginated(
@@ -162,5 +170,14 @@ public class OrderController {
         order.setStatus(status);
         orderRepository.save(order);
         return ResponseEntity.ok("Order status updated successfully");
+    }
+
+    @Operation(summary = "Delete an order")
+    @DeleteMapping("/{orderId}")
+    public ResponseEntity<String> deleteOrder(@PathVariable Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with ID: " + orderId));
+        orderRepository.delete(order);
+        return ResponseEntity.ok("Order deleted successfully");
     }
 }
